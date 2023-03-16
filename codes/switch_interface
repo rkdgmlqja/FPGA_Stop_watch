@@ -1,0 +1,102 @@
+//Kang HB
+`timescale 1ns / 1ps
+
+module switch_interface(
+input mode,
+input clk,
+input rst,
+input strtps,
+input stp,
+input chngdigit,
+input numbup,
+output reg [2:0]switch_out,
+output reg rst_n,
+output reg modeout
+);
+
+reg rstq1, rstq2;
+reg strtps1, strtps2;
+reg stp1, stp2;
+reg chngdigit1, chngdigit2;
+reg numbup1, numbup2;
+
+wire fmscnt;
+reg [19:00] mscnt ;
+localparam ms = 625000;
+
+wire rstd, strtpsd, stpd, chngdigitd, numbupd;
+assign  rstd = (rstq1)&(~rstq2);
+assign  strtpsd = (strtps1)&(~strtps2);
+assign  stpd = (stp1)&(~stp2);
+assign  chngdigitd = (chngdigit1)&(~chngdigit2);
+assign  numbupd = (numbup1)&(~numbup2);
+
+//5msclkgen
+always @(posedge clk) begin
+    if(fmscnt)begin
+        if(rstd)begin
+            mscnt<=0;
+         end
+         else begin
+            mscnt<=mscnt;
+         end
+    end
+    else begin
+        mscnt<=mscnt+1;
+        if(mscnt==ms-1)begin
+            mscnt<=0;
+        end
+    end
+end
+assign fmscnt = (mscnt==ms-1) ? 1'b1:1'b0; 
+
+always@(posedge clk) begin
+    if(fmscnt) begin
+        rstq1<=rst;
+        rstq2<=rstq1;
+        
+        strtps1<=strtps;
+        strtps2<=strtps1;
+        
+        stp1<=stp;
+        stp2<=stp1;
+        
+        chngdigit1<=chngdigit;
+        chngdigit2<=chngdigit1;
+        
+        numbup1<=numbup;
+        numbup2<=numbup1;
+        
+        modeout<=mode;
+    end
+end
+
+always@(posedge clk)begin
+    if(fmscnt)begin
+        if(rstd) begin
+            rst_n<=0;
+        end
+        else begin
+            rst_n<=1;
+        end
+        
+        if(strtpsd) begin
+            switch_out<= 3'd1;
+        end
+        else if(stpd) begin
+            switch_out<= 3'd2;
+        end
+        else if(chngdigitd) begin
+            switch_out<= 3'd3;
+        end
+        else if(numbupd) begin
+            switch_out<= 3'd4;
+        end
+        else begin
+            switch_out<= 3'd0;
+        end
+    end
+end
+
+
+endmodule
