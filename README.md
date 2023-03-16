@@ -12,3 +12,4 @@ This project's goal is to design simple stopwatch using Zyboz7 FPGA board
 ![image](https://user-images.githubusercontent.com/33273567/225537604-622272ef-606e-4f73-a0e7-58a4b0d23324.png)
 
 ##Verification(Demo)
+https://youtu.be/V0-cNMIAUTk
